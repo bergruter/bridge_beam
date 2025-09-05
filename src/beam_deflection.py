@@ -9,13 +9,14 @@ def deflection_udl(x, L, E, I, q):
 	E - ГПа
 	I - м^4
 	q - кН/м
+	Вывод:
+	y(x) - мм (отрицательные значения - прогиб вниз)
 	"""
 	return -q * 1e3 * x * (L**3 - 2*L*x**2 +x**3)/(24 * E * 1e9 * I) ## результат в мм
 
 
 def main():
 	print("=== Расчет прогиба балки под равномерной нагрузкой (UDL) ===")
-
 
 	# # Ввод параметров от пользователя
 	# L = float(input("Введите длину балки L (м): ")) 
@@ -31,16 +32,27 @@ def main():
 	x = np.linspace(0, L, 200)
 	y = deflection_udl(x, L, E, I, q) # прогиб в мм
 
-	# Вычисление максимального прогиба (в миллиметрах)
-	y_max = abs(np.min(y))
+	# Координата и вычисление максимального прогиба (в миллиметрах)
+	idx_min = np.argmin(y)
+	x_max = x[idx_min]
+	y_max = y[idx_min]
+	y_max_abs = abs(y_max)
 
 
 	# Вывод результата
 	print("\n===Результат===")
-	print(f"Максмальный прогиб: {y_max*1e3:.3f} мм (в центре пролета)")
+	print(f"Максмальный прогиб: {y_max*1e3:.3f} мм (в {x_max:.2f} м)")
 
 	# Построение графика 
 	plt.plot(x, y, label="Прогиб балки (мм)")
+	plt.scatter(x_max, y_max, color="red", zorder=5)
+	plt.annotate(
+		f"{y_max_abs*1e3:.2f} мм\nx={x_max:.2f} м",
+		xy = (x_max, y_max),
+		xytext=(x_max, y_max*0.7),
+		arrowprops=dict(arrowstyle="->", color="red"),
+		ha="center", color ="red"
+	)
 	plt.title("Прогиб шарнирно-опертой балки под равномерной нагрузкой")
 	plt.xlabel("Координата х, м")
 	plt.ylabel("Прогиб, мм")
