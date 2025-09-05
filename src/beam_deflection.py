@@ -49,38 +49,46 @@ def deflection_point_load(x, L, E, I, P, a):
 
 
 def main():
-	print("=== Расчет прогиба балки под равномерной нагрузкой (UDL) ===")
-
-	# # Ввод параметров от пользователя
-	# L = float(input("Введите длину балки L (м): ")) 
-	# E = float(input("Введите модуль Юнга E (ГПа): "))
-	# I = float(input("Введите момент инерции I (м^4): "))
-	# q = float(input("Введите равномерно-распределенную нагрузку q (кН/м): "))
-	# L = 10
-	# E = 200
-	# I = 0.0001
-	# q = 5
-
+	print("=== Расчет прогиба балки ===")
+	print("1 - Равномерная нагрузка (q)")
+	print("2 - Сосредоточенная нагрузка (P в точке а)")
+	choice = input("Выберите тип нагрузки [1/2]: ").strip()
+	
+	# Ввод параметров от пользователя
+	L = float(input("Введите длину балки L (м): ")) 
+	E = float(input("Введите модуль Юнга E (ГПа): "))
+	I = float(input("Введите момент инерции I (м^4): "))
+	
 	# Сетка точек вдоль балки для построения графика
 	x = np.linspace(0, L, 2001)
-	y = deflection_udl(x, L, E, I, q) # прогиб в мм
+	
+	if choice == "1":
+		q = float(input("Введите равномерную нагрузку q (кН/м): "))
+		y = deflection_udl(x, L, E, I, q) # прогиб в мм
+		label = f"Равномерная нагрузка q={q} кН/м"
+	elif choice == "2":
+		P = float(input("Введите сосредоточенную нагрузку Р (кН): "))
+		a = float(input("Введите координату приложения силы a (м): "))
+		y = deflection_point_load(x, L, E, I, P, a)
+		label = f"Сосредоточенная нагрузка Р={P} кН, a={a} м"
+	else:
+		print("Неверный выбор")
+		return
 
 	# Координата и вычисление максимального прогиба (в миллиметрах)
 	idx_min = np.argmin(y)
-	x_max = x[idx_min]
-	y_max = y[idx_min]
+	x_max, y_max = x[idx_min], y[idx_min]
 	y_max_abs = abs(y_max)
-
 
 	# Вывод результата
 	print("\n===Результат===")
 	print(f"Максмальный прогиб: {y_max:.3f} мм (в точке х = {x_max:.2f} м)")
 
 	# Построение графика 
-	plt.plot(x, y, label="Прогиб балки (мм)")
+	plt.plot(x, y, label=label)
 	plt.scatter(x_max, y_max, color="red", zorder=5)
 	plt.annotate(
-		f"{-y_max_abs:.2f} мм\nx={x_max:.2f} м",
+		f"{-y_max_abs:.3f} мм\nx={x_max:.2f} м",
 		xy = (x_max, y_max),
 		xytext=(x_max, y_max*0.7),
 		arrowprops=dict(arrowstyle="->", color="red"),
@@ -98,9 +106,4 @@ def main():
 	plt.show()
 
 if __name__ == "__main__":
-	# main()
-	L, E, I, P = 10, 200, 1e-4, 10  # м, ГПа, м^4, кН
-	a = L / 2
-	x = np.linspace(0, L, 5)  # пять точек для проверки
-	y = deflection_point_load(x, L, E, I, P, a)
-	print("Прогибы (мм):", y)
+	main()
