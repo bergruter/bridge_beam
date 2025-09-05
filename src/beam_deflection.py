@@ -12,7 +12,10 @@ def deflection_udl(x, L, E, I, q):
 	Вывод:
 	y(x) - мм (отрицательные значения - прогиб вниз)
 	"""
-	return -q * 1e3 * x * (L**3 - 2*L*x**2 +x**3)/(24 * E * 1e9 * I) ## результат в мм
+	E_SI = E * 1e9
+	q_SI = q * 1e3
+	y_m = q_SI * x * (L**3 - 2*L*x**2 + x**3) / (24 * E_SI * I)  # результат прогиба в метрах
+	return -y_m *1e3 # результат прогиба в мм, отрицательное значение по вертикали
 
 
 def main():
@@ -41,13 +44,13 @@ def main():
 
 	# Вывод результата
 	print("\n===Результат===")
-	print(f"Максмальный прогиб: {y_max*1e3:.3f} мм (в {x_max:.2f} м)")
+	print(f"Максмальный прогиб: {y_max:.3f} мм (в точке х = {x_max:.2f} м)")
 
 	# Построение графика 
 	plt.plot(x, y, label="Прогиб балки (мм)")
 	plt.scatter(x_max, y_max, color="red", zorder=5)
 	plt.annotate(
-		f"{y_max_abs*1e3:.2f} мм\nx={x_max:.2f} м",
+		f"{-y_max_abs:.2f} мм\nx={x_max:.2f} м",
 		xy = (x_max, y_max),
 		xytext=(x_max, y_max*0.7),
 		arrowprops=dict(arrowstyle="->", color="red"),
@@ -62,7 +65,7 @@ def main():
 	# Сохраняем график в results/
 	plt.savefig("results/beam_deflection.png", dpi=150)
 
-	#plt.show()
+	plt.show()
 
 if __name__ == "__main__":
 	main()
